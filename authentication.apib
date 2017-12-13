@@ -1,0 +1,42 @@
+# Group Authentication
+
+::: note
+#### <i class="fa fa-info"></i> Note
+`JWT Authentication` has to be replaced by OAUth2 for accounting, and more grannular security.
+:::
+
+The API uses JWT Authentication to authenticate users to the server.
+
+For authenticating, you need to be a registered user.
+Once you have registered yourself as an user, you can send a request
+to get the `access_token`. Then use it in an
+`Authorization` header while sending a request in the following
+manner: `Authorization: JWT <access_token>`
+
+## JWT Authentication [/auth/session]
+
+### Authenticate and generate token [POST]
+
++ Request
+    Authenticate and generate token
+
+    + Headers
+
+            Content-Type: application/json
+
+    + Attributes
+
+        + username: someone (string, required) - Name of the user
+        + password: strong password (string, required) - Password of the user
+
++ Response 200 (application/json)
+
+    Successful authentication
+
+    + Attributes
+
+        + access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGl0eSI6MjY0MjIsImlhdCI6MTUwMzg1NTcxNywibmJmIjoxNTAzODU1NzE3LCJleHAiOjE1MDM5NDIxMTd9.laV71Wi14Zd50MEZN5D15naGEmBYtaYV (string, required) - JWT token
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)

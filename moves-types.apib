@@ -1,0 +1,171 @@
+# Group Moves Types
+Resources related to GeoKrety in the API.
+
+---
+
+**Moves Types endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+---
+
+**Moves Types attributes:**
+
+| Parameter                | Description                               | Type    | Required | Readonly | Public  |
+|:-------------------------|-------------------------------------------|---------|----------|----------|---------|
+| `name`                   | Moves Type name                           | string  | **yes**  | -        | **yes** |
+| `require-waypoint`       | Moves of this type require a waypoint     | boolean | **yes**  | -        | **yes** |
+| `require-tracking-code`  | Moves of this type require a tracking-code| boolean | **yes**  | -        | **yes** |
+
+---
+
+**Moves Types:**
+
+Currently known Moves Types:
+
+| Type       | Description   | Require waypoint | Require Tracking-Code |
+|:-----------|---------------|------------------|-----------------------|
+| `0`        | Dropped to    | **yes**          | **yes**               |
+| `1`        | Grabbed from  | -                | **yes**               |
+| `2`        | A comment     | -                | -                     |
+| `3`        | Seen in       | **yes**          | **yes**               |
+| `4`        | Archived      | -                | **yes**               |
+| `5`        | Visiting      | **yes**          | **yes**               |
+
+---
+
+**Moves Types Relations:**
+
+| Parameter       | Type         | Description                           |
+|:----------------|--------------|---------------------------------------|
+| `move`          | moves        | Moves which are of the type            |
+
+---
+
+## Moves Type Details [/v1/moves-types/{moves_types_id}]
+
++ Parameters
+    + moves_types_id: 1 (string) - ID of the Moves Types.
+
+### Get Moves Type [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (moves-types-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-types`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## GeoKrety Collection [/v1/moves-types{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
+
+### List all Moves Type [GET]
+Retrieve paginated list of Moves Type.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-types-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-types`
+
+
+
+## List Moves of this type [/v1/moves-types/{move_type}/moves{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
+
+### List Moves of this type [GET]
+Retrieve paginated list of Moves Type.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-types-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-types`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+# Data Structures
+
+## `moves-types-data-type` (object)
+- `type`: `geokrety-type` (string, required)
+- `id`: `1` (string, required)
+
+## `moves-types-links` (object)
+- `self`: `/moves-types/1` (string, required)
+
+## `moves-types-attributes` (object)
+- `name`: `Traditional` (string, required)
+
+## `moves-types-geokrety` (object)
+- `links` (object)
+  - `self`: `/moves-types/1/relationships/geokrety` (string, required)
+  - `related`: `/moves-types/1/geokrety` (string, required)
+
+## `moves-types-moves` (object)
+- `links` (object)
+  - `self`: `/moves-types/1/relationships/moves` (string, required)
+  - `related`: `/moves-types/1/moves` (string, required)
+
+## `moves-types-relationships` (object)
+- `geokrety` (moves-types-geokrety, required)
+- `moves` (moves-types-moves, required)
+
+## `moves-types-data` (moves-types-data-type)
+- `attributes` (moves-types-attributes, required)
+- `relationships` (moves-types-relationships, required)
+- `links` (moves-types-links, required)

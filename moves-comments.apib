@@ -1,0 +1,345 @@
+# Group Moves Comments
+Resources related to Moves Comments in the API.
+
+---
+
+**Moves Comments endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✓       | ✓ [1]   | ✓ [1]   |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+ - 1. Only self-owned informations
+
+---
+
+**Moves Comments attributes:**
+
+| Parameter             | Description                                  | Type    | Required | Readonly | Public  |
+|:----------------------|----------------------------------------------|---------|----------|----------|---------|
+| `comment`             | User comment on the move                     | string  | **yes**  | -        | **yes** |
+| `type`                | Type of comment (See bellow)                 | integer | **yes**  | -        | **yes** |
+| `created-on-date-time`| Creation on date time                        | date    | -        | **yes**  | **yes** |
+| `updated-on-date-time`| Updated on date time                         | date    | -        | **yes**  | **yes** |
+
+---
+
+**Moves Comments Types:**
+
+| Type       | Description   |
+|:-----------|---------------|
+| `0`        | Same entry    |
+| `1`        | Missing       |
+
+---
+
+**Moves Comments Relations:**
+
+| Parameter       | Type         | Description                           | Required |
+|:----------------|--------------|---------------------------------------|----------|
+| `move`          | move         | Commented move                        | **yes**  |
+| `author`        | users        | User which commented                  | -        |
+| `geokret`       | geokrety     | GeoKret which was moved/commented     | **yes**  |
+
+---
+
+## Moves Comments Details [/v1/moves-comments/{geokret_id}]
+
++ Parameters
+    + geokret_id: 1 (string) - ID of the GeoKret.
+
+### Get Move Comment [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (moves-comments-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-comments`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+### Update Geokrety Move Comment [PATCH]
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (moves-comments-data-type, required)
+            + `attributes` (moves-comments-attributes-write)
+
++ Response 200 (application/vnd.api+json)
+User himself or Administrators
+
+    + Attributes (object)
+        + `data` (moves-comments-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-comments`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/vnd.api+json)
+
+    + Attributes (Error 422)
+
+
+
+### Delete Geokrety Move Comment [DELETE]
+Delete a single Geokrety Move Comment.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## GeoKrety Moves Comments Collection [/v1/moves-comments{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
+### GeoKrety Moves Comments [POST]
+
+::: note
+#### <i class="fa fa-info"></i> Note
+If no user specified, currently connected user will be used.
+:::
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (moves-comments-data-type, required)
+          + `attributes` (moves-comments-attributes-write)
+          - `relationships` (object)
+              - `move` (object, required)
+                  - `data` (object, required)
+                      - `type`: move (string, required, fixed)
+                      - `id`: 1 (string, required)
+              - `user` (object)
+                  - `data` (object)
+                      - `type`: `user` (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (moves-comments-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-comments`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 422 (application/vnd.api+json)
+
+    + Attributes (Error 422)
+
+
+### List All Moves Comments [GET]
+Retrieve paginated list of Moves Comments.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-comments-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-comments`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get Move Comments [/v1/moves/{move_id}/comments{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
++ Parameters
+    + move_id: 1 (integer) - ID of the Move
+
+### Get Move Comments [GET]
+Retrieve paginated list of Moves Comments.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-comments-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-comments`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
+
+
+## Get User Comments [/v1/users/{user_id}/comments{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
++ Parameters
+    + user_id: 1 (integer) - ID of the Move
+
+### Get User Comments [GET]
+Retrieve paginated list of Moves Comments.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-comments-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves-comments`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
+
+
+# Data Structures
+
+## `moves-comments-data-type` (object)
+- `type`: `move-comment` (string, required)
+- `id`: `1` (string, required)
+
+## `moves-comments-links` (object)
+- `self`: `/moves-comments/1` (string, required)
+
+## `moves-comments-attributes-write` (object)
+- `comment`: `Thanks for the travel` (string, required)
+- `type`: `0` (enum, required)
+  - `0`: `Same entry` (number)
+  - `1`: `Missing` (number)
+
+## `moves-comments-attributes` (moves-comments-attributes-write)
+- `created-on-date-time`: `2007-10-25T12:10:22` (string)
+- `updated-on-date-time`: `2007-10-26T18:31:20` (string)
+
+## `moves-comments-author` (object)
+- `links` (object)
+  - `self`: `/moves-comments/1/relationships/author` (string, required)
+  - `related`: `/moves-comments/1/author` (string, required)
+
+## `moves-comments-move` (object)
+- `links` (object)
+  - `self`: `/moves-comments/1/relationships/move` (string, required)
+  - `related`: `/moves-comments/1/move` (string, required)
+
+## `moves-comments-geokret` (object)
+- `links` (object)
+  - `self`: `/moves-comments/1/relationships/geokret` (string, required)
+  - `related`: `/moves-comments/1/geokret` (string, required)
+
+## `moves-comments-relationships` (object)
+- `author` (moves-comments-author, required)
+- `move` (moves-comments-move, required)
+- `geokret` (moves-comments-geokret, required)
+
+## `moves-comments-data` (moves-comments-data-type)
+- `attributes` (moves-comments-attributes, required)
+- `relationships` (moves-comments-relationships, optional)
+- `links` (moves-comments-links, required)

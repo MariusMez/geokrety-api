@@ -1,0 +1,329 @@
+# Group News Subscriptions
+Resources related to news subscription in the API.
+This permit users to get notified on new new-comments.
+
+TODO: Maybe this should be splitted in others collections
+
+---
+
+**News Subscriptions endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✗       | ✗       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓ [1]   | ✓ [1]   | ✓ [1]   | ✗       | ✓ [1]   |
+| Administrators      | ✓       | ✓       | ✓       | ✗       | ✓       |
+
+ - 1. Only self-owned informations
+---
+
+**News Subscriptions attributes:**
+
+::: note
+#### <i class="fa fa-info"></i> Note
+Setting `subscribed` to `False` will internally delete the associated row.
+:::
+
+
+| Parameter                | Description                               | Type    | Required | Readonly | Public  |
+|:-------------------------|-------------------------------------------|---------|----------|----------|---------|
+| `subscribed`             | User subscription status                  | boolean | **yes**  | -        | -       |
+| `subscribed-on-date-time`| Subscription on date time                 | date    | -        | **yes**  | -       |
+
+---
+
+**News Subscriptions Relations:**
+
+| Parameter       | Type         | Description              |
+|:----------------|--------------|--------------------------|
+| `user`          | users        | User which is subscribed |
+| `news`          | news         | News subscribed          |
+
+---
+
+
+## News Subscriptions Details [/v1/news-subscriptions/{newssubscription_id}]
++ Parameters
+    + newssubscription_id: 1 (integer, required) - ID of the news subscription
+
+
+### News Subscriptions Details [GET]
+Get a single microlocation.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-subscriptions-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-subscriptions`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+### Delete News Subscriptions [DELETE]
+Delete a single News Subscriptions.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## News Subscriptions Collection [/v1/news-subscriptions{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
+### Subscribe to a News [POST]
+
+::: note
+#### <i class="fa fa-info"></i> Note
+If no user specified, currently connected user will be used.
+:::
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (news-subscriptions-data-type, required)
+          + `attributes` (news-subscriptions-attributes-write)
+          - `relationships` (object)
+              - `user` (object)
+                  - `data` (object)
+                      - `type`: `user` (string, required, fixed)
+                      - `id`: 1 (string, required)
+              - `news` (object, required)
+                  - `data` (object, required)
+                      - `type`: `news` (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-subscriptions-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-subscriptions`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+### List All News Subscriptions [GET]
+Retrieve paginated list of News News Subscriptions.
+
+This is reserved to Administrators.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `subscribed-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[news-subscriptions-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-subscriptions`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
+
+
+## Subscribe to a News [/v1/news/{news_id}/subscribe]
+
++ Parameters
+    + news_id: 1 (string) - ID of the news.
+
+### Subscribe to a News [POST]
+
+::: note
+#### <i class="fa fa-info"></i> Note
+If no user specified, currently connected user will be used.
+:::
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (news-subscriptions-data-type, required)
+          + `attributes` (news-subscriptions-attributes-write)
+          - `relationships` (object)
+              - `user` (object)
+                  - `data` (object)
+                      - `type`: `user` (string, required, fixed)
+                      - `id`: 1 (string, required)
+              - `news` (object, required)
+                  - `data` (object, required)
+                      - `type`: `news` (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-subscriptions-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-subscriptions`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+
+## UnSubscribe from a News [/v1/news/{news_id}/unsubscribe]
+
++ Parameters
+    + news_id: 1 (string) - ID of the news.
+
+### UnSubscribe from a News [DELETE]
+
+::: note
+#### <i class="fa fa-info"></i> Note
+If no user specified, currently connected user will be used.
+:::
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+# Data Structures
+
+## `news-subscriptions-data-type` (object)
+- `type`: `news-subscription` (string, required)
+- `id`: `1` (string, required)
+
+## `news-subscriptions-links` (object)
+- `self`: `/news-subscriptions/1` (string, required)
+
+## `news-subscriptions-attributes-write` (object)
+- `subscribed`: `true` (boolean, required)
+
+## `news-subscriptions-attributes` (news-subscriptions-attributes-write)
+- `subscribed-on-date-time`: `2007-10-26T18:31:20` (string)
+
+## `news-subscriptions-news` (object)
+- `links` (object)
+  - `self`: `/news-subscriptions/1/relationships/news` (string, required)
+  - `related`: `/news-subscriptions/1/news` (string, required)
+
+## `news-subscriptions-user` (object)
+- `links` (object)
+  - `self`: `/news-subscriptions/1/relationships/user` (string, required)
+  - `related`: `/news-subscriptions/1/user` (string, required)
+
+## `news-subscriptions-relationships` (object)
+- `news` (news-subscriptions-news, required)
+- `user` (news-subscriptions-user, required)
+
+## `news-subscriptions-data` (news-subscriptions-data-type)
+- `attributes` (news-subscriptions-attributes, required)
+- `relationships` (news-subscriptions-relationships, required)
+- `links` (news-subscriptions-links, required)

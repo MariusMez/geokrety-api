@@ -1,0 +1,155 @@
+# Group GeoKrety Types
+Resources related to GeoKrety in the API.
+
+---
+
+**GeoKrety Types endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+---
+
+**GeoKrety Types attributes:**
+
+| Parameter                | Description                               | Type    | Required | Readonly | Public  |
+|:-------------------------|-------------------------------------------|---------|----------|----------|---------|
+| `name`                   | Geokrety type name                        | string  | **yes**  | -        | **yes** |
+
+---
+
+**GeoKrety Types:**
+
+Currently known types.
+
+| Type       | Description   |
+|:-----------|---------------|
+| `0`        | Traditional   |
+| `1`        | A book/CD/DVD |
+| `2`        | A Human       |
+| `3`        | A coin        |
+| `4`        | KretyPost     |
+
+---
+
+**GeoKrety Types Relations:**
+
+| Parameter       | Type         | Description                           |
+|:----------------|--------------|---------------------------------------|
+| `geokrety`      | geokrety     | GeoKrety which are of the type        |
+
+---
+
+## GeoKrety Type Details [/v1/geokrety-types/{geokrety_types_id}]
+
++ Parameters
+    + geokrety_types_id: 1 (string) - ID of the GeoKrety Types.
+
+### Get GeoKrety Type [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-types-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-types`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+## GeoKrety Collection [/v1/geokrety-types{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
+
+### List all GeoKrety Type [GET]
+Retrieve paginated list of GeoKrety Type.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[geokrety-types-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-types`
+
+
+## GeoKrety Type Details [/v1/geokrety/{geokrety_id}/geokrety-types]
+
++ Parameters
+    + geokrety_id: 1 (string) - ID of the GeoKrety.
+
+### Get GeoKrety Type [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-types-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-types`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+# Data Structures
+
+## `geokrety-types-data-type` (object)
+- `type`: `geokrety-type` (string, required)
+- `id`: `1` (string, required)
+
+## `geokrety-types-links` (object)
+- `self`: `/geokrety-types/1` (string, required)
+
+## `geokrety-types-attributes` (object)
+- `name`: `Traditional` (string, required)
+
+## `geokrety-types-geokrety` (object)
+- `links` (object)
+  - `self`: `/geokrety-types/1/relationships/geokrety` (string, required)
+  - `related`: `/geokrety-types/1/geokrety` (string, required)
+
+## `geokrety-types-relationships` (object)
+- `geokrety` (geokrety-types-geokrety, required)
+
+## `geokrety-types-data` (geokrety-types-data-type)
+- `attributes` (geokrety-types-attributes, required)
+- `relationships` (geokrety-types-relationships, required)
+- `links` (geokrety-types-links, required)

@@ -1,0 +1,293 @@
+# Group Owner Codes
+Resources related to Owner Codes in the API.
+
+TODO: need to define endpoint for adoption
+
+---
+
+**Owner Codes endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✗       | ✗       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓ [1]   | ✓ [1]   | ✓ [1]   | ✗       | ✓ [1,2] |
+| Administrators      | ✓       | ✓       | ✓       | ✗       | ✓ [2]   |
+
+ - 1. Only self-owned GeoKrety
+ - 1. Only if GeoKret isn't adopted yet
+---
+
+**Owner Codes attributes:**
+
+| Parameter               | Description                                  | Type    | Required | Readonly | Public  |
+|:------------------------|----------------------------------------------|---------|----------|----------|---------|
+| `code`                  | GeoKret adoption secret code                 | string  | **yes**  | -        | -       |
+| `generated-on-date-time`| Generated on date time                       | date    | -        | **yes**  | -       |
+| `claimed-on-date-time`  | Claimed on date time                         | date    | -        | **yes**  | -       |
+
+---
+
+**Owner Codes Relations:**
+
+| Parameter       | Type         | Description                           | Required |
+|:----------------|--------------|---------------------------------------|----------|
+| `user`          | users        | User who adopted the Geokret          | -        |
+| `geokret`       | geokrety     | GeoKret which is to adoption          | **yes**  |
+
+---
+
+## Owner Codes Details [/v1/owner-codes/{owner_code_id}]
+
++ Parameters
+    + owner_code_id: 1 (string) - ID of the Owner Code.
+
+### Get Owner Code [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (owner-codes-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/owner-codes`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+### Delete Owner Code [DELETE]
+Delete a single Owner Code.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Owner Codes Collection [/v1/owner-codes{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
+### Owner Code [POST]
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (owner-codes-data-type, required)
+          + `attributes` (owner-codes-attributes-write)
+          - `relationships` (object)
+              - `geokret` (object, required)
+                  - `data` (object, required)
+                      - `type`: geokret (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (owner-codes-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/owner-codes`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/vnd.api+json)
+
+    + Attributes (Error 422)
+
+
+### List All Owner Codes [GET]
+Retrieve paginated list of Owner Codes.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `generated-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[owner-codes-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/owner-codes`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
+
+
+## Owner Codes Details [/v1/geokrety/{geokrety_id}/owner-code]
+
++ Parameters
+    + geokrety_id: 1 (string) - ID of the GeoKret.
+
+### Get Owner Code by GeoKret [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (owner-codes-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/owner-codes`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Adopt a GeoKret [/v1/geokrety/1/adopt]
+
+### Adopt a GeoKret [POST]
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (owner-codes-data-type, required)
+          + `attributes` (owner-codes-attributes-write)
+          - `relationships` (object)
+              - `geokret` (object, required)
+                  - `data` (object, required)
+                      - `type`: geokret (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (owner-codes-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/owner-codes`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/vnd.api+json)
+
+    + Attributes (Error 422)
+
+
+
+# Data Structures
+
+## `owner-codes-data-type` (object)
+- `type`: `move-comment` (string, required)
+- `id`: `1` (string, required)
+
+## `owner-codes-links` (object)
+- `self`: `/owner-codes/1` (string, required)
+
+## `owner-codes-attributes-write` (object)
+- `code`: `SECRETCODE` (string, required)
+
+## `owner-codes-attributes` (owner-codes-attributes-write)
+- `generated-on-date-time`: `2007-10-25T12:10:22` (string)
+- `claimed-on-date-time`: `2007-10-26T18:31:20` (string)
+
+## `owner-codes-user` (object)
+- `links` (object)
+  - `self`: `/owner-codes/1/relationships/user` (string, required)
+  - `related`: `/owner-codes/1/user` (string, required)
+
+## `owner-codes-geokret` (object)
+- `links` (object)
+  - `self`: `/owner-codes/1/relationships/geokret` (string, required)
+  - `related`: `/owner-codes/1/geokret` (string, required)
+
+## `owner-codes-relationships` (object)
+- `user` (owner-codes-user, required)
+- `geokret` (owner-codes-geokret, required)
+
+## `owner-codes-data` (owner-codes-data-type)
+- `attributes` (owner-codes-attributes, required)
+- `relationships` (owner-codes-relationships, required)
+- `links` (owner-codes-links, required)

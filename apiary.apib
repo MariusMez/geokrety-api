@@ -1,0 +1,85 @@
+FORMAT: 1A
+HOST: https://api.geokrety.org
+
+# GeoKrety Server API
+
+GeoKrety is an on-line tracking service targeted at Geocachers.
+Each registered object, called a GeoKret (plural: GeoKrety),
+has a unique tracking code, allowing its movements between locations
+such as Geocaches to be tracked and registered on the service.
+
+https://geokrety.org is an open source project started in 2007.
+It is developped and maintained by a group of volunters.
+
+Here you'll find the online documentation for the API behind the project.
+
+If you find any bug please open issues on the project GitHub tracker https://github.com/GeoKrety/geokrety-api/issues.
+
+
+
+::: warning
+#### <i class="fa fa-warning"></i> Caution
+This is **not yet the production service**. See https://geokrety.org/api.php for the current service API.
+:::
+
+
+# Data Structures
+
+
+## `jsonapi` (object)
+- `version`: `1.0` (string)
+
+## `JSONAPI Error` (object) - JSONAPI Error
++ status: 422 (number, required)
++ source (object, required)
+  + pointer: `/data/attributes/some_attribute` (string, required)
+  + detail: `Detailled reason of failure` (string, required)
+  + title: `Unprocessable Entity` (string, required)
+
+## Error 401 (object) - HTTP Error 401
++ description: Authentication required (string, required)
++ error: Bad Request (string, required)
++ status_code: 401 (number, required)
+
+## Error 403 (object) - HTTP Error 403
++ description: You don't have access to this ressource (string, required)
++ error: Access Forbidden (string, required)
++ status_code: 403 (number, required)
+
+## Error 404 (object) - HTTP Error 404
++ description: This ressource does not exists (string, required)
++ error: Object Not Found (string, required)
++ status_code: 404 (number, required)
+
+## Error 422 (object) - JSONAPI HTTP Error 422
++ errors (array[JSONAPI Error], required)
++ jsonapi (jsonapi, required)
+
+
+
+## Deleted (object) - Object successfully deleted
++ meta (object, required)
+    + message: Object successfully deleted (string, required)
++ jsonapi (jsonapi, required)
+
+
+
+
+
+
+<!-- include(authentication.apib) -->
+<!-- include(geokrety.apib) -->
+<!-- include(geokrety-rating.apib) -->
+<!-- include(geokrety-subscriptions.apib) -->
+<!-- include(geokrety-types.apib) -->
+<!-- include(moves.apib) -->
+<!-- include(moves-comments.apib) -->
+<!-- include(moves-types.apib) -->
+<!-- include(news.apib) -->
+<!-- include(news-comments.apib) -->
+<!-- include(news-subscriptions.apib) -->
+<!-- include(owner-codes.apib) -->
+<!-- include(pictures.apib) -->
+<!-- include(statpics.apib) -->
+<!-- include(users.apib) -->
+<!-- include(waypoints.apib) -->

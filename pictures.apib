@@ -1,0 +1,60 @@
+# Group Pictures
+Resources related to pictures in the API.
+Pitcures can be associated with Users, GeoKrety, Move comments.
+
+TODO: This is just a draft, need to design something like https://cloud.google.com/storage/docs/json_api/v1/how-tos/simple-upload
+
+---
+
+**Pictures endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✓ [2]   | ✓ [1]   | ✓ [1]   |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+ - 1. Only user posted pictures
+ - 2. Only self avatar, owned GeoKrety avatar, owned move comments
+---
+
+**Pictures attributes:**
+
+| Parameter                | Description                               | Type    | Required | Readonly | Public  |
+|:-------------------------|-------------------------------------------|---------|----------|----------|---------|
+| `type`                   | Type of picture (see bellow)              | boolean | **yes**  | -        | **yes** |
+| `comment`                | User subscription status                  | string  | **yes**  | -        | **yes** |
+| `filename`               | User subscription status                  | string  | -        | **yes**  | **yes** |
+| `file-url`               | User subscription status                  | string  | -        | **yes**  | **yes** |
+| `created-on-date-time`   | Subscription on date time                 | date    | -        | **yes**  | **yes** |
+---
+
+**Type of picture:**
+
+| Value                | Description              |
+|:---------------------|--------------------------|
+| `0`                  | GeoKrety avatar          |
+| `1`                  | Move pictures            |
+| `2`                  | User avatar              |
+
+---
+
+**Pictures Relations:**
+
+| Parameter       | Type         | Description                  |
+|:----------------|--------------|------------------------------|
+| `owner`         | users        | User which uploaded the file |
+| `user`          | users        | User's avatar                |
+| `geokret`       | geokrety     | GeoKret's avatar             |
+| `move`          | moves        | Move's pictures              |
+
+---
+
+# Data Structures
+
+## `pictures-data-type` (object)
+- `type`: `picture` (string, required)
+- `id`: `1` (string, required)
+
+## `pictures-links` (object)
+- `self`: `/pictures/1` (string, required)

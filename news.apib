@@ -1,0 +1,349 @@
+# Group News
+Resources related to news.
+
+---
+
+**News endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+---
+
+**News attributes:**
+
+| Parameter               | Description                               | Type    | Required | Readonly | Public  |
+|:------------------------|-------------------------------------------|---------|----------|----------|---------|
+| `title`                 | Title of the news                         | string  | **yes**  | -        | **yes** |
+| `content`               | The full text of the news                 | string  | **yes**  | -        | **yes** |
+| `username`              | Override the username who posted the news | string  | -        | -        | **yes** |
+| `comments-count`        | How many comment are attached to the news | integer | -        | **yes**  | **yes** |
+| `created-on-date-time`  | News creation date                        | date    | -        | **yes**  | **yes** |
+| `last-comment-date-time`| Date of the last comment                  | date    | -        | **yes**  | **yes** |
+
+---
+
+**News Relations:**
+
+| Parameter       | Type         | Description              |
+|:----------------|--------------|--------------------------|
+| `author`        | users        | News author              |
+| `news-comments` | news-comment | Posted news comment list |
+
+---
+
+## News Details [/v1/news/{news_id}]
+
++ Parameters
+    + news_id: 1 (string) - ID of the news.
+
+### Get news [GET]
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+### Update News [PATCH]
+Update a single news by `id`.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+
+
+    + Attributes (object)
+        + `data` (news-data-type, required)
+          + `attributes` (news-attributes-write)
+          - `relationships` (object)
+              - `author` (object)
+                  - `data` (object, required)
+                      - `type`: user (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/vnd.api+json)
+
+    + Attributes (Error 422)
+
+
+
+### Delete News [DELETE]
+Delete a single News.
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+## News Collection [/v1/news{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
+
+### Create a News [POST]
+
++ Request
+
+    + Attributes (object)
+        + `attributes` (news-attributes-write)
+        - `relationships` (object)
+            - `author` (object)
+                - `data` (object, required)
+                    - `type`: user (string, required, fixed)
+                    - `id`: 1 (string, required)
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+            Accept: application/vnd.api+json
+
++ Response 201 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/vnd.api+json)
+
+    + Attributes (Error 422)
+
+
+### List all news [GET]
+Retrieve paginated list of news.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[news-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news`
+
+
+
+## List User published News [/v1/users/{user_id}/news{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
++ Parameters
+    + user_id: 1 (string) - ID of the user id in the form of an integer
+
+### List User published News [GET]
+Retrieve paginated list of news.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[news-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## List User subscribed News [/v1/users/{user_id}/subscribed-news{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
++ Parameters
+    + user_id: 1 (string) - ID of the user id in the form of an integer
+
+### List User subscribed News [GET]
+Retrieve paginated list of news.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[news-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get News-Comment News [/v1/news-comments/{news_comment_id}/news]
+
++ Parameters
+    + news_comment_id: 1 (string) - ID of the news comment
+
+### Get News-Comment News [GET]
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[news-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+# Data Structures
+
+## `news-data-type` (object)
+- `type`: `news` (string, required)
+- `id`: `1` (string, required)
+
+## `news-links` (object)
+- `self`: `/news/1` (string, required)
+
+## `news-attributes-write` (object)
+- `title`: `First News` (string, required)
+- `content`: `3,2,1,0 START! :) Have Fun!` (string, required)
+- `username`: `someone` (string, optional, nullable)
+
+## `news-attributes` (news-attributes-write)
+- `created-on-date-time`: `2007-10-26T18:31:20` (string, required)
+- `comments-count`: `0` (number, required)
+- `last-comment-date-time` (string, optional, nullable)
+
+## `news-news-comments` (object)
+- `links` (object)
+  - `self`: `/news/1/relationships/news-comments` (string, required)
+  - `related`: `/news/1/news-comments` (string, required)
+
+## `news-author` (object)
+- `links` (object)
+  - `self`: `/news/1/relationships/author` (string, required)
+  - `related`: `/news/1/author` (string, required)
+
+## `news-relationships` (object)
+- `news-comments` (news-news-comments, required)
+- `author` (news-author, required)
+
+## `news-data` (news-data-type)
+- `attributes` (news-attributes, required)
+- `relationships` (news-relationships, required)
+- `links` (news-links, required)

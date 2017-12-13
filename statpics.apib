@@ -1,0 +1,266 @@
+# Group StatPics Templates
+Resources related to GeoKrety in the API.
+
+---
+
+**StatPics endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+---
+
+**StatPics attributes:**
+
+| Parameter                | Description                               | Type    | Required | Readonly | Public  |
+|:-------------------------|-------------------------------------------|---------|----------|----------|---------|
+| `name`                   | StatPic template name                     | string  | -        | -        | **yes** |
+| `url`                    | StatPic url                               | string  | -        | **yes**  | **yes** |
+
+---
+
+**StatPics:**
+
+Currently known StatPic templates.
+
+| Type       | Description   |
+|:-----------|---------------|
+| `0`        | Minimal       |
+| `1`        | Design        |
+| `2`        | Real mole     |
+| `3`        | Grass         |
+| `4`        | With hand     |
+| `5`        | Yellow        |
+| `6`        | See           |
+| `7`        | Cloudy        |
+| `8`        | Flowers       |
+
+---
+
+**StatPics Relations:**
+
+| Parameter       | Type         | Description                           |
+|:----------------|--------------|---------------------------------------|
+| `user`          | users        | User which choosen this template      |
+
+---
+
+## StatPic Details [/v1/statpics-templates/{statpic_template_id}]
+
++ Parameters
+    + statpic_template_id: 1 (string) - ID of the StatPics.
+
+### Get StatPic [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (statpics-templates-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/statpics-templates`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+### Update StatPic [PATCH]
+Update a single StatPic by `id`.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+
+
+    + Attributes (object)
+        + `data` (statpics-templates-data-type, required)
+          + `attributes` (statpics-templates-attributes)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (statpics-templates-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/statpics-templates`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+
+### Delete StatPic [DELETE]
+
+::: warning
+#### <i class="fa fa-warning"></i> Caution
+This will reset users using this template to some other statpic. The last template cannot be deleted.
+:::
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+## GeoKrety Collection [/v1/statpics-templates{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
+
+### Create a StatPic [POST]
+
++ Request
+
+    + Attributes (object)
+        + `attributes` (statpics-templates-attributes)
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+            Accept: application/vnd.api+json
+
++ Response 201 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (statpics-templates-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/statpics-templates`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+### List all StatPic [GET]
+Retrieve paginated list of StatPic.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `name`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[statpics-templates-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/statpics-templates`
+
+
+## Get User StatPic [/v1/users/{user_id}/statpic]
+
++ Parameters
+    + user_id: 1 (string) - ID of the StatPics.
+
+### Get User StatPic [GET]
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (statpics-templates-data)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/statpics-templates`
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+# Data Structures
+
+## `statpics-templates-data-type` (object)
+- `type`: `statpic-template` (string, required)
+- `id`: `1` (string, required)
+
+## `statpics-templates-links` (object)
+- `self`: `/statpics-templates/1` (string, required)
+
+## `statpics-templates-attributes` (object)
+- `name`: `Traditional` (string, required)
+
+## `statpics-templates-users` (object)
+- `links` (object)
+  - `self`: `/statpics-templates/1/relationships/users` (string, required)
+  - `related`: `/statpics-templates/1/users` (string, required)
+
+## `statpics-templates-relationships` (object)
+- `geokrety` (statpics-templates-users, required)
+
+## `statpics-templates-data` (statpics-templates-data-type)
+- `attributes` (statpics-templates-attributes, required)
+- `relationships` (statpics-templates-relationships, required)
+- `links` (statpics-templates-links, required)

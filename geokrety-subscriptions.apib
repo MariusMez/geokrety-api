@@ -1,0 +1,271 @@
+# Group GeoKrety Subscriptions
+Resources related to GeoKrety Subscriptions in the API.
+
+TODO: Maybe this should be splitted in others collections
+
+---
+
+**GeoKrety Subscriptions endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✓       | ✗       | ✓ [1]   |
+| Administrators      | ✓       | ✓       | ✓       | ✗       | ✓       |
+
+ - 1. Only self-owned informations
+
+---
+
+**GeoKrety Subscriptions attributes:**
+
+| Parameter             | Description                                  | Type    | Required | Readonly | Public  |
+|:----------------------|----------------------------------------------|---------|----------|----------|---------|
+
+---
+
+**GeoKrety Subscriptions Relations:**
+
+| Parameter       | Type         | Description                           | Required |
+|:----------------|--------------|---------------------------------------|----------|
+| `user`          | users        | User which is subscribed              | -        |
+| `geokret`       | geokrety     | GeoKret which was subscribed          | **yes**  |
+
+---
+
+## Geokrety Subscriptions Details [/v1/geokrety-subscriptions/{geokrety_subscriptions_id}]
+
++ Parameters
+    + geokrety_subscriptions_id: 1 (string) - ID of the geokrety-subscriptions.
+
+### Get Geokrety Subscriptions [GET]
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-subscriptions-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-subscriptions`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+### Delete Geokrety Subscriptions [DELETE]
+Delete a single Geokrety Subscriptions.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## GeoKrety Subscriptions Collection [/v1/geokrety-subscriptions{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
+### Watch a GeoKret [POST]
+
+::: note
+#### <i class="fa fa-info"></i> Note
+If no user specified, currently connected user will be used.
+:::
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (geokrety-subscriptions-data-type, required)
+          + `attributes` (geokrety-subscriptions-attributes-write)
+          - `relationships` (object)
+              - `geokrety` (object, required)
+                  - `data` (object, required)
+                      - `type`: `geokrety` (string, required, fixed)
+                      - `id`: 1 (string, required)
+              - `user` (object)
+                  - `data` (object)
+                      - `type`: `user` (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-subscriptions-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-subscriptions`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+### List All GeoKrety Subscriptions [GET]
+Retrieve paginated list of GeoKrety Subscriptions.
+
+::: note
+#### <i class="fa fa-info"></i> Note
+This is reserved to Administrators.
+:::
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `subscribed-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[geokrety-subscriptions-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-subscriptions`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
+
+
+## Watch a GeoKret [/v1/geokrety/1/{geokret_id}/watch]
+
++ Parameters
+    + geokret_id: 1 (string) - ID of the geokrety.
+
+### Watch a GeoKret [POST]
+
+::: note
+#### <i class="fa fa-info"></i> Note
+If no user specified, currently connected user will be used.
+:::
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (geokrety-subscriptions-data-type, required)
+          + `attributes` (geokrety-subscriptions-attributes-write)
+          - `relationships` (object)
+              - `user` (object)
+                  - `data` (object)
+                      - `type`: `user` (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-subscriptions-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-subscriptions`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+
+# Data Structures
+
+## `geokrety-subscriptions-data-type` (object)
+- `type`: `geokrety-subscription` (string, required)
+- `id`: `1` (string, required)
+
+## `geokrety-subscriptions-links` (object)
+- `self`: `/geokrety-subscriptions/1` (string, required)
+
+## `geokrety-subscriptions-attributes-write` (object)
+
+## `geokrety-subscriptions-attributes` (geokrety-subscriptions-attributes-write)
+
+## `geokrety-subscriptions-geokrety` (object)
+- `links` (object)
+  - `self`: `/geokrety-subscriptions/1/relationships/geokret` (string, required)
+  - `related`: `/geokrety-subscriptions/1/geokret` (string, required)
+
+## `geokrety-subscriptions-user` (object)
+- `links` (object)
+  - `self`: `/geokrety-subscriptions/1/relationships/user` (string, required)
+  - `related`: `/geokrety-subscriptions/1/user` (string, required)
+
+## `geokrety-subscriptions-relationships` (object)
+- `geokret` (geokrety-subscriptions-geokrety, required)
+- `user` (geokrety-subscriptions-user, required)
+
+## `geokrety-subscriptions-data` (geokrety-subscriptions-data-type)
+- `attributes` (geokrety-subscriptions-attributes, required)
+- `relationships` (geokrety-subscriptions-relationships, required)
+- `links` (geokrety-subscriptions-links, required)

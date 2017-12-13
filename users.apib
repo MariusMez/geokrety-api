@@ -1,0 +1,904 @@
+# Group Users
+Resources related to users in the API.
+
+---
+
+**User endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✗       | ✓ [1]   | ✓       | ✗       | ✗       |
+| Authenticated       | ✓ [1]   | ✓ [1,2] | ✗       | ✓ [2]   | ✗       |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+ - 1. Only public informations
+ - 2. Only self-owned informations
+---
+
+**User attributes:**
+
+| Parameter               | Description                            | Type    | Required | Readonly | Public  |
+|:------------------------|----------------------------------------|---------|----------|----------|---------|
+| `name`                  | User name                              | string  | **yes**  | -        | **yes** |
+| `email`                 | User email                             | string  | **yes**  | -        |         |
+| `password`              | User password                          | string  | **only on create**  | -        | **Cannot be read** |
+| `language`              | User primary spoken language           | string  | -        | -        | **yes** |
+| `country`               | User home country                      | string  | -        | **yes**  | **yes** |
+| `latitude`              | User home latitude                     | float   | -        | -        |         |
+| `longitude`             | User home longitude                    | float   | -        | -        |         |
+| `daily-mails`           | User want to receive daily mail digest | boolean | -        | -        |         |
+| `observation-radius`    | Observation area in kilometers         | integer | -        | -        |         |
+| `hour`                  | Send mail at this hour                 | integer | -        | **yes**  |         |
+| `statpic-url`           | User's StatPic image url               | string  | -        | **yes**  | **yes** |
+| `avatar-url`            | User's Avatar image url                | string  | -        | **yes**  | **yes** |
+| `secid`                 | User secret id for legacy API          | string  | -        | -        |         |
+| `joined-date-time`      | News creation date                     | date    | -        | **yes**  | **yes** |
+| `last-update-date-time` | Date of last account update            | date    | -        | **yes**  |         |
+| `last-mail-date-time`   | Date of last sent mail (daily mail)    | date    | -        | **yes**  |         |
+| `last-login-date-time`  | Date of last login                     | date    | -        | **yes**  |         |
+
+---
+
+**User Relations:**
+
+| Parameter         | Type               | Description              |
+|:------------------|--------------------|--------------------------|
+| `news`            | news               | Posted news list         |
+| `news-comments`   | news-comment       | Posted news comment list |
+| `statpic-template`| statpics-templates | Prefered statpic template|
+| `avatar`          | pictures           | User avatar              |
+
+---
+
+
+
+## User Details [/v1/users/{id}]
+
++ Parameters
+    + id: 1 (integer) - ID of the user
+
+
+### Get user [GET]
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (users-links, required)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+### Update user [PATCH]
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (users-data-type, required)
+            + `attributes` (users-attributes-write)
+                - `name`: `someone else` (string, required)
+
++ Response 200 (application/vnd.api+json)
+User himself or Administrators
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/vnd.api+json)
+Username already taken
+
+    + Attributes (Error 422)
+
+
+
+### Delete user [DELETE]
+
+::: warning
+#### <i class="fa fa-warning"></i> Caution
+This will delete **all** user activity, including logs, comments and pictures.
+:::
+
++ Request Authenticated - Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Users Collection [/v1/users{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
+
+### Create User [POST]
+Create a user account.
+
++ Request
+    Unauthenticated
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (object)
+            + `type`: `user` (string, required)
+            + `attributes` (users-attributes-write)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
+
+
+
+### List All Users [GET]
+Retrieve users list.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `name`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+    Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[users-data-public])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
+
+
+## List Users Subscribed to a News [/v1/news/{news_id}/subscribed-users{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
+
+### List Users Subscribed to a News [GET]
+Retrieve users list.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `name`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+    Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[users-data-public])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## List Users watching a GeoKret [/v1/geokrety/{geokret_id}/watching-users{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
++ Parameters
+    + geokret_id: 1 (integer) - ID of the GeoKret
+
+### List Users watching a GeoKret [GET]
+Retrieve paginated list of Users.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `name`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+    Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[users-data-public])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## List Users rating a GeoKret [/v1/geokrety/{geokret_id}/rating-users{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
++ Parameters
+    + geokret_id: 1 (integer) - ID of the GeoKret
+
+### List Users rating a GeoKret [GET]
+Retrieve paginated list of Users.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `name`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+    Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[users-data-public])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## List Users who moved a GeoKret [/v1/geokrety/{geokret_id}/moved-by-users{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
++ Parameters
+    + geokret_id: 1 (integer) - ID of the GeoKret
+
+### List Users who moved a GeoKret [GET]
+Retrieve paginated list of Users.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `name`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+    Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[users-data-public])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get GeoKrety Owner [/v1/geokrety/{geokret_id}/owner]
+
++ Parameters
+    + geokret_id: 1 (integer) - ID of the GeoKret
+
+
+### Get GeoKrety Owner [GET]
+Get the owner of a GeoKret.
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get GeoKrety Holder [/v1/geokrety/{geokret_id}/holder]
+
++ Parameters
+    + geokret_id: 1 (integer) - ID of the GeoKret
+
+
+### Get GeoKrety Holder [GET]
+Get the user who currently hold the GeoKret.
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get News Author [/v1/news/{news_id}/author]
++ Parameters
+    + news_id: 1 (integer) - ID of the news in the form of an integer
+
+
+### Get News Author [GET]
+Get the author for a news.
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get Move Author [/v1/move/{move_id}/author]
++ Parameters
+    + move_id: 1 (integer) - ID of the move
+
+
+### Get Move Author [GET]
+Get the author for a move.
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get Move-Comment Author [/v1/move/{move_comment_id}/author]
++ Parameters
+    + move_comment_id: 1 (integer) - ID of the move comment
+
+
+### Get Move-Comment Author [GET]
+Get the author for a move comment.
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+
+## Get News-Comment Author [/v1/news-comments/{news_id}/author]
++ Parameters
+    + news_id: 1 (integer) - ID of the news in the form of an integer
+
+
+### Get News-Comment Author [GET]
+Get the author for a news comment.
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+
+## Get Picture Author [/v1/pictures/{picture_id}/author]
++ Parameters
+    + picture_id: 1 (integer) - ID of the picture
+
+
+### Get Picture Author [GET]
+Get the author for a picture.
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+
+## Get Rate Author [/v1/geokrety-ratings/{rate_id}/author]
+
++ Parameters
+    + rate_id: 1 (integer) - ID of the Rate
+
+
+### Get Rate Author [GET]
+Get the author of a Rate.
+
+
++ Request Anonymous or Authenticated
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-public, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (users-data-private, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+          + `self`: `/users`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+# Data Structures
+
+## `users-data-type` (object)
+- `type`: `user` (string, required)
+- `id`: `1` (string, required)
+
+## `users-links` (object)
+- `self`: `/users/1` (string, required)
+
+## `users-attributes` (object)
+- `name`: `someone` (string, required)
+
+## `users-attributes-write` (object)
+- `name`: `someone` (string)
+- `email`: `user@ema.il` (string)
+- `password`: `strong password` (string)
+- `language`: `fr` (string)
+- `latitude`: `48.86471` (number)
+- `longitude`: `2.34901` (number)
+- `observation-radius`: `7` (number)
+- `secid`: `abc123` (string)
+
+## `users-attributes-private` (users-attributes)
+- `email`: `user@ema.il` (string, required)
+- `daily-mails`: `true` (boolean)
+- `language`: `fr` (string)
+- `latitude`: `48.86471` (number)
+- `longitude`: `2.34901` (number)
+- `observation-radius`: `7` (number)
+- `country`: `fr` (string)
+- `hour`: `7` (number)
+- `statpic-url`: `https://static.geokrety.org/statpics/1.png` (string)
+- `avatar-url`: `https://static.geokrety.org/avatars/1.png` (string)
+- `join-date-time`: `2017-01-26T19:46:44+00:00` (string, required)
+- `last-update-date-time`: `2017-01-26T19:46:44+00:00` (string)
+- `last-mail-date-time`: `2017-03-29T07:52:02` (string, optional, nullable)
+- `last-login-date-time`: `2017-03-14T22:04:05` (string, optional, nullable)
+- `secid`: `abc123` (string)
+
+## `users-attributes-public` (users-attributes)
+- `language`: `fr` (string)
+- `country`: `fr` (string)
+- `statpic-url`: `https://static.geokrety.org/statpics/1.png` (string)
+- `avatar-url`: `https://static.geokrety.org/avatars/1.png` (string)
+- `join-date-time`: `2017-01-26T19:46:44+00:00` (string, required)
+
+## `users-news` (object)
+- `links` (object)
+  - `self`: /users/1/relationships/news (string, required)
+  - `related`: `/users/1/news` (string, required)
+
+## `users-news-comment` (object)
+- `links` (object)
+  - `self`: `/users/1/relationships/news-comments` (string, required)
+  - `related`: `/users/1/news-comments` (string, required)
+
+## `users-statpic-template` (object)
+- `links` (object)
+  - `self`: `/users/1/relationships/statpic-template` (string, required)
+  - `related`: `/users/1/statpic-template` (string, required)
+
+## `users-geokrety-owned` (object)
+- `links` (object)
+  - `self`: `/users/1/relationships/geokrety-owned` (string, required)
+  - `related`: `/users/1/geokrety-owned` (string, required)
+
+## `users-geokrety-inventory` (object)
+- `links` (object)
+  - `self`: `/users/1/relationships/geokrety-inventory` (string, required)
+  - `related`: `/users/1/geokrety-inventory` (string, required)
+
+## `users-geokrety-watched` (object)
+- `links` (object)
+  - `self`: `/users/1/relationships/geokrety-watched` (string, required)
+  - `related`: `/users/1/geokrety-watched` (string, required)
+
+## `users-geokrety-rates` (object)
+- `links` (object)
+  - `self`: `/users/1/relationships/geokrety-rates` (string, required)
+  - `related`: `/users/1/geokrety-rates` (string, required)
+
+## `users-geokrety-moved` (object)
+- `links` (object)
+  - `self`: `/users/1/relationships/geokrety-moved` (string, required)
+  - `related`: `/users/1/geokrety-moved` (string, required)
+
+## `users-relationships` (object)
+- `news` (users-news, required)
+- `news-comments` (users-news-comment, required)
+- `statpic-template` (users-statpic-template, required)
+- `geokrety-owned` (users-geokrety-owned, required)
+- `geokrety-inventory` (users-geokrety-inventory, required)
+- `geokrety-watched` (users-geokrety-watched, required)
+- `geokrety-rates` (users-geokrety-rates, required)
+- `geokrety-moved` (users-geokrety-moved, required)
+
+## `meta` (object)
+- `count`: `1` (number, required)
+
+## `users-data-private` (users-data-type)
+- `attributes` (users-attributes-private, required)
+- `relationships` (users-relationships, required)
+- `links` (users-links, required)
+
+## `users-data-public` (users-data-type)
+- `attributes` (users-attributes-public, required)
+- `relationships` (users-relationships, required)
+- `links` (users-links, required)

@@ -1,0 +1,357 @@
+# Group GeoKrety Rating
+Resources related to GeoKrety Rating in the API.
+
+---
+
+**GeoKrety Rating endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✗       | ✗       | ✗       | ✗       | ✗       |
+| Authenticated       | ✗       | ✓ [1]   | ✓       | ✓ [1]   | ✓ [1]   |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+ - 1. Only self-owned informations
+---
+
+**GeoKrety Rating attributes:**
+
+| Parameter             | Description                                  | Type    | Required | Readonly | Public  |
+|:----------------------|----------------------------------------------|---------|----------|----------|---------|
+| `rate`                | GeoKret rate                                 | integer | **yes**  | -        | **yes** |
+
+---
+
+**GeoKrety Rating Relations:**
+
+| Parameter       | Type         | Description                           | Required |
+|:----------------|--------------|---------------------------------------|----------|
+| `author`        | users        | User which rated the GeoKret          | -        |
+| `geokret`       | geokrety     | GeoKret which was rated               | **yes**  |
+
+---
+
+## GeoKrety Rating [/v1/geokrety-ratings/{geokret_rating_id}]
+
++ Parameters
+    + geokret_rating_id: 1 (string) - ID of the Rate.
+
+### Get GeoKret Rating [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-ratings-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-ratings`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+### Update GeoKret Rating [PATCH]
+Update a single GeoKret Rate by `id`.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+
+
+    + Attributes (object)
+        + `data` (geokrety-ratings-data-type, required)
+          + `attributes` (geokrety-ratings-attributes-write)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-ratings-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-ratings`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+
+### Delete GeoKret Rating [DELETE]
+Delete a single GeoKret Rate.
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## GeoKret Rating Collection [/v1/geokrety-ratings{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
+
+### Rate a GeoKret [POST]
+
++ Request
+
+    + Attributes (object)
+        + `attributes` (geokrety-ratings-attributes-write)
+        - `relationships` (object)
+            - `geokret` (object, required)
+                - `data` (object, required)
+                    - `type`: geokret (string, required, fixed)
+                    - `id`: 1 (string, required)
+            - `author` (object)
+                - `data` (object, required)
+                    - `type`: user (string, required, fixed)
+                    - `id`: 1 (string, required)
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+            Accept: application/vnd.api+json
+
++ Response 201 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-ratings-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-ratings`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+### List all geokrety-ratings [GET]
+Retrieve paginated list of geokrety-ratings.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[geokrety-ratings-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-ratings`
+
+
+
+## Rate a GeoKret [/v1/geokrety/{geokret_id}/rate]
+
++ Parameters
+    + geokret_id: 1 (string) - ID of the GeoKret.
+
+### Rate a GeoKret [POST]
+
++ Request
+
+    + Attributes (object)
+        + `attributes` (geokrety-ratings-attributes-write)
+        - `relationships` (object)
+            - `geokret` (object, required)
+                - `data` (object, required)
+                    - `type`: geokret (string, required, fixed)
+                    - `id`: 1 (string, required)
+            - `author` (object)
+                - `data` (object, required)
+                    - `type`: user (string, required, fixed)
+                    - `id`: 1 (string, required)
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+            Accept: application/vnd.api+json
+
++ Response 201 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (geokrety-ratings-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-ratings`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+
+## List User Rates [/v1/users/{user_id}/geokrety-rates{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
++ Parameters
+    + user_id: 1 (string) - ID of the user id in the form of an integer
+
+### List User Rates [GET]
+Retrieve paginated list of GeoKrety Rates.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[geokrety-ratings-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-ratings`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## List GeoKret Rates [/v1/geokrety/{geokret_id}/rates{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
+
++ Parameters
+    + geokret_id: 1 (string) - ID of the GeoKret
+
+### List GeoKret Rates [GET]
+Retrieve paginated list of GeoKret Rates.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[geokrety-ratings-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/geokrety-ratings`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+# Data Structures
+
+## `geokrety-ratings-data-type` (object)
+- `type`: `geokrety-rating` (string, required)
+- `id`: `1` (string, required)
+
+## `geokrety-ratings-links` (object)
+- `self`: `/geokrety-ratings/1` (string, required)
+
+## `geokrety-ratings-attributes-write` (object)
+- `rate`: `5` (number, required)
+
+## `geokrety-ratings-attributes` (geokrety-ratings-attributes-write)
+
+## `geokrety-ratings-author` (object)
+- `links` (object)
+  - `self`: `/geokrety-ratings/1/relationships/author` (string, required)
+  - `related`: `/geokrety-ratings/1/author` (string)
+
+## `geokrety-ratings-geokret` (object)
+- `links` (object)
+  - `self`: `/geokrety-ratings/1/relationships/geokret` (string, required)
+  - `related`: `/geokrety-ratings/1/geokret` (string, required)
+
+## `geokrety-ratings-relationships` (object)
+- `author` (geokrety-ratings-author, required)
+- `geokret` (geokrety-ratings-geokret, required)
+
+## `geokrety-ratings-data` (geokrety-ratings-data-type)
+- `attributes` (geokrety-ratings-attributes, required)
+- `relationships` (geokrety-ratings-relationships, required)
+- `links` (geokrety-ratings-links, required)

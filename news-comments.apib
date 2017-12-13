@@ -1,0 +1,320 @@
+# Group News Comments
+Resources related to news comments in the API.
+
+---
+
+**News Comment endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✗       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✓       | ✓ [1,2] | ✓ [1]   |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+ - 1. Only self-owned informations
+ - 2. Except relationships
+---
+
+**News Comment attributes:**
+
+| Parameter               | Description                               | Type    | Required | Readonly | Public  |
+|:------------------------|-------------------------------------------|---------|----------|----------|---------|
+| `comment`               | The full text of the comment              | string  | **yes**  | -        | **yes** |
+| `icon`                  | Comment icon id                           | integer | -        | -        | **yes** |
+| `created-on-date-time`  | News creation date                        | date    | -        | **yes**  | **yes** |
+
+---
+
+**News Comment Relations:**
+
+| Parameter       | Type         | Description              |
+|:----------------|--------------|--------------------------|
+| `author`        | users        | News Comment author      |
+| `news`          | news         | Commented news           |
+
+---
+
+
+## News Comments Details [/v1/news-comments/{newscomment_id}]
++ Parameters
+    + newscomment_id: 1 (integer) - ID of the news in the form of an integer
+
+
+### News Comments Details [GET]
+Get a single microlocation.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-comments-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-comments`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+### Update News Comments [PATCH]
+Update a single news by `id`.
+
++ `id` (string) - ID of the record to update **(required)**
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+
+
+    + Attributes (object)
+        + `data` (news-comments-data-type, required)
+          + `attributes` (news-comments-attributes-write)
+          - `relationships` (object)
+              - `author` (object)
+                  - `data` (object)
+                      - `type`: `user` (string, required, fixed)
+                      - `id`: 1 (string, required)
+              - `news` (object)
+                  - `data` (object, required)
+                      - `type`: `news` (string, required, fixed)
+                      - `id`: 1 (string, required)
+
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-comments-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-comments`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+
+### Delete News Comments [DELETE]
+Delete a single News.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+## News Comments Collection [/v1/news-comments{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
+
+### Create a News Comment [POST]
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+
+    + Attributes (object)
+        + `attributes` (news-comments-attributes-write)
+        - `relationships` (object)
+            - `author` (object)
+                - `data` (object)
+                    - `type`: `user` (string, required, fixed)
+                    - `id`: 1 (string, required)
+            - `news` (object, required)
+                - `data` (object, required)
+                    - `type`: `news` (string, required, fixed)
+                    - `id`: 1 (string, required)
+
+
++ Response 201 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (news-comments-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-comments`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+### List All News Comments [GET]
+Retrieve paginated list of News Comments.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[news-comments-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-comments`
+
+
+
+## List News Comments published by User [/v1/users/{user_id}/news-comments{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
++ Parameters
+    + user_id: 1 (integer) - ID of the user id in the form of an integer
+
+### List News Comments published by User [GET]
+Retrieve news list.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[news-comments-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-comments`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## List News News-Comments [/v1/news/{news_id}/news-comments{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
++ Parameters
+    + news_id: 1 (integer) - ID of the news
+
+### List News News-Comments [GET]
+Retrieve news list.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[news-comments-data])
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/news-comments`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+# Data Structures
+
+## `news-comments-data-type` (object)
+- `type`: `news-comment` (string, required)
+- `id`: `1` (string, required)
+
+## `news-comments-links` (object)
+- `self`: `/news-comments/1` (string, required)
+
+## `news-comments-attributes-write` (object)
+- `comment`: `Hey hey hey great news!` (string, required)
+- `icon`: `0` (number, required)
+
+## `news-comments-attributes` (news-comments-attributes-write)
+- `created-on-date-time`: `2007-10-26T18:31:20` (string)
+
+## `news-comments-news` (object)
+- `links` (object)
+  - `self`: `/news-comments/1/relationships/news` (string, required)
+  - `related`: `/news-comments/1/news` (string, required)
+
+## `news-comments-author` (object)
+- `links` (object)
+  - `self`: `/news-comments/1/relationships/author` (string, required)
+  - `related`: `/news-comments/1/author` (string, required)
+
+## `news-comments-relationships` (object)
+- `news` (news-comments-news, required)
+- `author` (news-comments-author, required)
+
+## `news-comments-data` (news-comments-data-type)
+- `attributes` (news-comments-attributes, required)
+- `relationships` (news-comments-relationships, required)
+- `links` (news-comments-links, required)

@@ -1,0 +1,468 @@
+# Group Moves
+Resources related to moves in the API.
+
+---
+
+**Moves endpoints permissions:**
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✓       | ✓       | ✓       | ✗       | ✗       |
+| Authenticated       | ✓       | ✓       | ✓       | ✓ [1,2] | ✓ [1,2] |
+| Administrators      | ✓       | ✓       | ✓       | ✓       | ✓       |
+
+ - 1. Only self-owned informations
+ - 2. Only on Owned GeoKrety
+---
+
+**Moves attributes:**
+
+| Parameter             | Description                                  | Type    | Required       | Readonly | Public  |
+|:----------------------|----------------------------------------------|---------|----------------|----------|---------|
+| **`tracking-code`**   | GeoKret tracking code used to authenticate the move| integer | **yes** [1,3]| -    | -       |
+| `waypoint`            | Code of the position waypoint                | string  | **yes** [1]    | -        | **yes** |
+| `latitude`            | Postion when GeoKret was dropped/visited     | double  | **yes** [1]    | -        | **yes** |
+| `longitude`           | Postion when GeoKret was dropped/visited     | double  | **yes** [1]    | -        | **yes** |
+| `comment`             | User comment when moving GeoKret             | string  | **recommended**| -        | **yes** |
+| `username`            | Override displayed username. (Anonymous only)| string  | **yes** [2]    | -        | **yes** |
+| `application`         | Application name used to post this move      | string  | **recommended**| -        | **yes** |
+| `application-version` | Application version used to post this move   | string  | **recommended**| -        | **yes** |
+| `altitude`            | Altitude of the position (m)                 | integer | -              | **yes**  | **yes** |
+| `country`             | Country of the position                      | string  | -              | **yes**  | **yes** |
+| `distance`            | Distance with last position (km)             | integer | -              | **yes**  | **yes** |
+| `comments-count`      | Comments count on this move                  | integer | -              | **yes**  | **yes** |
+| `pictures-count`      | Total Move pictures                          | integer | -              | **yes**  | **yes** |
+| `created-on-date-time`| Creation on date time                        | date    | -              | **yes**  | **yes** |
+| `updated-on-date-time`| Updated on date time                         | date    | -              | **yes**  | **yes** |
+
+ - 1. Only for certain move types (See bellow)
+ - 2. Only when unauthenticated
+ - 3. Write only!
+
+---
+
+**Moves Relations:**
+
+| Parameter       | Type          | Description                           | Link mode                     | Required |
+|:----------------|---------------|---------------------------------------|-------------------------------|----------|
+| `type`          | move-type     | Type of the move                      | -                             | **yes**  |
+| `author`        | users         | User which created the move           | Automatic from connected user |          |
+| `geokret`       | geokret       | GeoKret which was moved               | Automatic from tracking-code  |
+| `comments`      | moves-comments| Comments for this move                | -                             |          |
+
+---
+
+## Geokrety Moves Details [/v1/moves/{move_id}]
+
++ Parameters
+    + move_id: 1 (string) - ID of the move.
+
+### Get Geokrety Move [GET]
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (moves-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+### Update Geokrety Move [PATCH]
+
+
++ Request Authenticated - Self or Administrators
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (moves-data-type, required)
+            + `attributes` (moves-attributes-write)
+
++ Response 200 (application/vnd.api+json)
+User himself or Administrators
+
+    + Attributes (object)
+        + `data` (moves-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/vnd.api+json)
+Constraints may be:
+  * A move at the same date time already exists
+  * Move is in the future
+
+    + Attributes (Error 422)
+
+
+
+### Delete Geokrety Move [DELETE]
+Delete a single Geokrety Moves.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## GeoKrety Moves Collection [/v1/moves{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
+### GeoKrety Move Details [POST]
+
+::: note
+#### <i class="fa fa-info"></i> Note
+If no user specified, currently connected user will be used.
+:::
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (moves-data-type, required)
+          + `attributes` (moves-attributes-write)
+          - `relationships` (object)
+              - `user` (object)
+                  - `data` (object)
+                      - `type`: `user` (string, required, fixed)
+                      - `id`: 1 (string, required)
+              - `geokret` (object, required)
+                  - `data` (object, required)
+                      - `type`: geokret (string, required, fixed)
+                      - `id`: 1 (string, required)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (moves-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+### List All GeoKrety Moves [GET]
+Retrieve paginated list of GeoKrety Moves.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
+
+
+## List GeoKret Moves [/v1/geokrety/{geokrety_id}/moves{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
++ Parameters
+    + geokrety_id: 1 (integer) - ID of the GeoKret
+
+
+### List GeoKret Moves [GET]
+Retrieve paginated list of GeoKrety Moves.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## List Users Moves [/v1/users/{user_id}/geokrety-moved{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
++ Parameters
+    + user_id: 1 (integer) - ID of the User
+
+### List Users Moves [GET]
+Retrieve paginated list of GeoKrety Moves.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+    + Attributes (Error 404)
+
+
+
+## List Moves by Move Type [/v1/moves-types/{move_type_id}/moves{?page%5Bsize%5D,page%5Bnumber%5D,sort,filter}]
++ Parameters
+    + move_type_id: 1 (integer) - ID of the Move Type
+
+### List Moves by Move Type [GET]
+Retrieve paginated list of GeoKrety Moves.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5Bnumber%5D (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `created-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[moves-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get Move-Comment Move [/v1/moves-comments/{move_comment_id}]
+
++ Parameters
+    + move_comment_id: 1 (integer) - ID of the Move Comment
+
+### Get Move-Comment Move [GET]
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (moves-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Get Picture Move [/v1/pictures/{picture_id}]
+
++ Parameters
+    + picture_id: 1 (string) - ID of the picture.
+
+### Get Picture Move [GET]
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (moves-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/moves`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+# Data Structures
+
+## `moves-data-type` (object)
+- `type`: `move` (string, required)
+- `id`: `1` (string, required)
+
+## `moves-links` (object)
+- `self`: `/moves/1` (string, required)
+
+## `moves-attributes-write` (object)
+- `tracking-code`: `XFS125` (string)
+- `waypoint`: `OC12345` (string)
+- `latitude`: `48.86471` (number)
+- `longitude`: `2.34901` (number)
+- `comment`: `Dropped this GeoKret in a very nice place.` (string)
+- `username`: `someone` (string)
+- `application`: `geokrety-api` (string)
+- `application-version`: `2.0 beta 1` (string)
+
+## `moves-attributes` (moves-attributes-write)
+- `altitude`: `123` (number)
+- `country`: `fr` (string)
+- `distance`: `35` (number)
+- `comments-count`: `2` (number)
+- `pictures-count`: `5` (number)
+- `created-on-date-time`: `2007-10-25T12:10:22` (string)
+- `updated-on-date-time`: `2007-10-26T18:31:20` (string)
+
+## `moves-move-type` (object)
+- `links` (object)
+  - `self`: `/moves/1/relationships/type` (string, required)
+  - `related`: `/moves/1/type` (string, required)
+
+## `moves-geokrety` (object)
+- `links` (object)
+  - `self`: `/moves/1/relationships/geokrety` (string, required)
+  - `related`: `/moves/1/geokrety` (string, required)
+
+## `moves-author` (object)
+- `links` (object)
+  - `self`: `/moves/1/relationships/author` (string, required)
+  - `related`: `/moves/1/author` (string, required)
+
+## `moves-relationships` (object)
+- `type` (moves-move-type, required)
+- `geokrety` (moves-geokrety, required)
+- `author` (moves-author, required)
+
+## `moves-data` (moves-data-type)
+- `attributes` (moves-attributes, required)
+- `relationships` (moves-relationships, required)
+- `links` (moves-links, required)

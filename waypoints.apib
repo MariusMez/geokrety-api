@@ -1,0 +1,208 @@
+# Group Waypoints
+Resources related to Waypoints in the API.
+
+Filled when synchronizing with other networks.
+
+---
+
+**Waypoints endpoints permissions:**
+
+TODO: Users will need to lookup by waypoint, when filling `ruchy.php`
+
+| Privilege level     | List    | View    | Create  | Update  | Delete  |
+|:--------------------|---------|---------|---------|---------|---------|
+| Anonymous           | ✗       | ✗       | ✗       | ✗       | ✗       |
+| Authenticated       | ✗       | ✗       | ✗       | ✗       | ✗       |
+| Administrators      | ✓       | ✓       | ✓       | ✗       | ✓       |
+
+---
+
+**Waypoints attributes:**
+
+| Parameter               | Description                                  | Type    | Required | Readonly | Public  |
+|:------------------------|----------------------------------------------|---------|----------|----------|---------|
+| `latitude`              | Waypoint position                            | double  | **yes**  | -        | -       |
+| `longitude`             | Waypoint position                            | double  | **yes**  | -        | -       |
+| `altitude`              | Altitude of the position (m)                 | integer | -        | **yes**  | -       |
+| `country`               | Country of the position                      | string  | -        | **yes**  | -       |
+| `name`                  | Cache name                                   | string  | **yes**  | -        | -       |
+| `owner`                 | Cache owner name                             | string  | **yes**  | -        | -       |
+| `type`                  | Cache type                                   | string  | **yes**  | -        | -       |
+| `country-name`          | Country full name                            | string  | **yes**  | -        | -       |
+| `link`                  | Link to the cache                            | string  | **yes**  | -        | -       |
+| `status`                | Cache current status                         | integer | **yes**  | -        | -       |
+| `updated-on-date-time`  | Updated on date time                         | date    | -        | **yes**  | -       |
+
+---
+
+## Waypoints Details [/v1/waypoints/{waypoint}]
+
++ Parameters
+    + waypoint: 1 (string) - ID of the Waypoint.
+
+### Get Waypoint [GET]
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (waypoints-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/waypoints`
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+### Delete Waypoint [DELETE]
+Delete a single Waypoint.
+
+
++ Request
+
+    + Headers
+
+            Authorization: JWT <Auth Key>
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (Deleted, required)
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 404 (application/json)
+
+    + Attributes (Error 404)
+
+
+
+## Waypoints Collection [/v1/waypoints{?page%5Bsize%5D,page%5bnumber%5d,sort,filter}]
+
+### Waypoint [POST]
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+            Content-Type: application/vnd.api+json
+
+    + Attributes (object)
+        + `data` (waypoints-data-type, required)
+            + `attributes` (waypoints-attributes-write)
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `data` (waypoints-data, required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/waypoints`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
++ Response 422 (application/json)
+
+    + Attributes (Error 422)
+
+
+### List All Waypoints [GET]
+Retrieve paginated list of Waypoints.
+
++ Parameters
+    + page%5Bsize%5D (optional, integer, `10`) - Maximum number of resources in a single paginated response.
+    + page%5bnumber%5d (optional, integer, `2`) - Page number to be fetched for the paginated response.
+    + sort (optional, string, `updated-on-date-time`) - Sort the resources according to the given attribute in ascending order. Append '-' to sort in descending order.
+    + filter (optional, string, ``) - Filter according to the flask-rest-jsonapi filtering system. Please refer: http://flask-rest-jsonapi.readthedocs.io/en/latest/filtering.html for more.
+
+
++ Request
+
+    + Headers
+
+            Accept: application/vnd.api+json
+
++ Response 200 (application/vnd.api+json)
+
+    + Attributes (object)
+        + `meta` (meta, required)
+        + `data` (array[waypoints-data], required)
+        + `jsonapi` (jsonapi, required)
+        + `links` (object, required)
+            + `self`: `/waypoints`
+
++ Response 401 (application/json)
+
+    + Attributes (Error 401)
+
++ Response 403 (application/json)
+
+    + Attributes (Error 403)
+
+
+
+# Data Structures
+
+## `waypoints-data-type` (object)
+- `type`: `waypoint` (string, required)
+- `id`: `1` (string, required)
+
+## `waypoints-links` (object)
+- `self`: `/waypoints/1` (string, required)
+
+## `waypoints-attributes-write` (object)
+- `latitude`: `48.86471` (number, required)
+- `longitude`: `2.34901` (number, required)
+- `name`: `Cache name` (string, required)
+- `owner`: `Cache owner name` (string, required)
+- `type`: `Cache name` (string, required)
+- `country-name`: `Cache name` (string, required)
+- `link`: `Link to the cache` (string, required)
+- `status`: `0` (number, required)
+
+## `waypoints-attributes` (waypoints-attributes-write)
+- `altitude`: `123` (number)
+- `country`: `fr` (string)
+- `updated-on-date-time`: `2007-10-26T18:31:20` (string)
+
+## `waypoints-user` (object)
+- `links` (object)
+  - `self`: `/waypoints/1/relationships/user` (string, required)
+  - `related`: `/waypoints/1/user` (string, required)
+
+## `waypoints-geokret` (object)
+- `links` (object)
+  - `self`: `/waypoints/1/relationships/geokret` (string, required)
+  - `related`: `/waypoints/1/geokret` (string, required)
+
+## `waypoints-relationships` (object)
+- `user` (waypoints-user, required)
+- `geokret` (waypoints-geokret, required)
+
+## `waypoints-data` (waypoints-data-type)
+- `attributes` (waypoints-attributes, required)
+- `relationships` (waypoints-relationships, required)
+- `links` (waypoints-links, required)
